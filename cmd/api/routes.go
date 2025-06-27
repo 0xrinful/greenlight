@@ -9,6 +9,9 @@ import (
 func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
+	router.NotFound = http.HandlerFunc(app.sendNotFoundError)
+	router.MethodNotAllowed = http.HandlerFunc(app.sendMethodNotAllowedError)
+
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 
 	router.HandlerFunc(http.MethodGet, "/v1/movies/:id", app.showMovieHandler)
