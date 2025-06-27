@@ -21,10 +21,12 @@ func (app *application) readIDParam(r *http.Request) (int64, error) {
 	return id, nil
 }
 
+type envelope map[string]any
+
 func (app *application) renderJSON(
 	w http.ResponseWriter,
 	status int,
-	data any,
+	data envelope,
 	headers http.Header,
 ) error {
 	js, err := json.MarshalIndent(data, "", "  ")
