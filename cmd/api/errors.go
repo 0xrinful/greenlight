@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 )
@@ -34,4 +35,22 @@ func (app *application) sendNotFoundError(w http.ResponseWriter, r *http.Request
 func (app *application) sendMethodNotAllowedError(w http.ResponseWriter, r *http.Request) {
 	message := fmt.Sprintf("the %s method is not supported for this resource", r.Method)
 	app.sendError(w, r, http.StatusMethodNotAllowed, message)
+}
+
+type malformedRequest struct {
+	status  int
+	message string
+}
+
+func (e *malformedRequest) Error() string {
+	return e.message
+}
+
+func (app *application) sendBadRequestError(w http.ResponseWriter, r *http.Request, err error) {
+	var mr *malformedRequest
+	if errors.As(err, &mr) {
+		app.sendError(w, r, mr.status, mr.message)
+		return
+	}
+	app.sendError(w, r, http.StatusBadRequest, err.Error())
 }
