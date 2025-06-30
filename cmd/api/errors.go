@@ -54,3 +54,11 @@ func (app *application) sendBadRequestError(w http.ResponseWriter, r *http.Reque
 	}
 	app.sendError(w, r, http.StatusBadRequest, err.Error())
 }
+
+func (app *application) sendValidationError(
+	w http.ResponseWriter,
+	r *http.Request,
+	errors map[string]string,
+) {
+	app.sendError(w, r, http.StatusUnprocessableEntity, errors)
+}
