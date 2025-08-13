@@ -102,7 +102,7 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 
 	err = app.decodeJSON(w, r, &input)
 	if err != nil {
-		app.sendServerError(w, r, err)
+		app.sendBadRequestError(w, r, err)
 		return
 	}
 
