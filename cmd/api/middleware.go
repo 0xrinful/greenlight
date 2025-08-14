@@ -23,6 +23,10 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 }
 
 func (app *application) rateLimit(next http.Handler) http.Handler {
+	if !app.config.limiter.enabled {
+		return next
+	}
+
 	type client struct {
 		limiter  *rate.Limiter
 		lastSeen time.Time
@@ -47,31 +51,29 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 	}()
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if app.config.limiter.enabled {
-			ip, _, err := net.SplitHostPort(r.RemoteAddr)
-			if err != nil {
-				app.sendServerError(w, r, err)
-				return
-			}
-
-			mu.Lock()
-			if _, ok := clients[ip]; !ok {
-				clients[ip] = &client{
-					limiter: rate.NewLimiter(
-						rate.Limit(app.config.limiter.rps),
-						app.config.limiter.burst,
-					),
-				}
-			}
-			clients[ip].lastSeen = time.Now()
-
-			if !clients[ip].limiter.Allow() {
-				mu.Unlock()
-				app.sendrateLimitExceededError(w, r)
-				return
-			}
-			mu.Unlock()
+		ip, _, err := net.SplitHostPort(r.RemoteAddr)
+		if err != nil {
+			app.sendServerError(w, r, err)
+			return
 		}
+
+		mu.Lock()
+		if _, ok := clients[ip]; !ok {
+			clients[ip] = &client{
+				limiter: rate.NewLimiter(
+					rate.Limit(app.config.limiter.rps),
+					app.config.limiter.burst,
+				),
+			}
+		}
+		clients[ip].lastSeen = time.Now()
+
+		if !clients[ip].limiter.Allow() {
+			mu.Unlock()
+			app.sendrateLimitExceededError(w, r)
+			return
+		}
+		mu.Unlock()
 
 		next.ServeHTTP(w, r)
 	})
