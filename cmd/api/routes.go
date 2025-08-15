@@ -22,6 +22,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc("DELETE", "/v1/movies/:id", app.deleteMovieHandler)
 
 	router.HandlerFunc("POST", "/v1/users", app.registerUserHandler)
+	router.HandlerFunc("PUT", "/v1/users/activated", app.acivateUserHandler)
 
 	standard := alice.New(app.recoverPanic, app.rateLimit)
 
