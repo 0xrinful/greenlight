@@ -52,9 +52,9 @@ func (app *application) renderJSON(
 }
 
 func (app *application) decodeJSON(w http.ResponseWriter, r *http.Request, dst any) error {
-	ct := w.Header().Get("Content-Type")
+	ct := r.Header.Get("Content-Type")
 	if ct != "" {
-		mediaType := strings.ToLower(strings.Split(ct, ";")[0])
+		mediaType := strings.ToLower(strings.TrimSpace(strings.Split(ct, ";")[0]))
 		if mediaType != "application/json" {
 			msg := "Content-Type header is not application/json"
 			return &malformedRequest{status: http.StatusUnsupportedMediaType, message: msg}

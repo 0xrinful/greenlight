@@ -24,7 +24,9 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc("POST", "/v1/users", app.registerUserHandler)
 	router.HandlerFunc("PUT", "/v1/users/activated", app.acivateUserHandler)
 
-	standard := alice.New(app.recoverPanic, app.rateLimit)
+	router.HandlerFunc("POST", "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
+
+	standard := alice.New(app.recoverPanic, app.rateLimit, app.authenticate)
 
 	return standard.Then(router)
 }

@@ -75,3 +75,17 @@ func (app *application) sendrateLimitExceededError(w http.ResponseWriter, r *htt
 	message := "rate limit exceeded"
 	app.sendError(w, r, http.StatusTooManyRequests, message)
 }
+
+func (app *application) sendInvalidCredentialsError(w http.ResponseWriter, r *http.Request) {
+	message := "invalid authentication credentials"
+	app.sendError(w, r, http.StatusUnauthorized, message)
+}
+
+func (app *application) sendInvalidAuthenticationTokenError(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	w.Header().Set("WWW-Authenticate", "Bearer")
+	message := "invalid or missing authentication token"
+	app.sendError(w, r, http.StatusUnauthorized, message)
+}
