@@ -1,6 +1,7 @@
 package main
 
 import (
+	"expvar"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -41,7 +42,13 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc("POST", "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
 
-	standard := alice.New(app.recoverPanic, app.enableCORS, app.rateLimit, app.authenticate)
+	router.Handler("GET", "/debug/vars", expvar.Handler())
+
+	standard := alice.New(
+		app.metrics, app.recoverPanic,
+		app.enableCORS, app.rateLimit,
+		app.authenticate,
+	)
 
 	return standard.Then(router)
 }
